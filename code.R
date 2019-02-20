@@ -2,44 +2,9 @@ library(Xy)
 library(dplyr)
 library(caret)
 library(rsample)
-library(xgboost)
 library(purrr)
 library(furrr)
 library(ggplot2)
-
-# Function for fitting XGBoost model
-fit_xgb <- function(df, params, ...) {
-  
-  # Convert to specific DMatrix format
-  xgb_train <- xgb.DMatrix(data = as.matrix(df), label = df$y)
-  
-  # Run training
-  mod <- xgb.train(params = list(eta = params$eta,
-                                 gamma = params$gamma,
-                                 max_depth = params$max_depth,
-                                 min_child_weight = params$min_child_weight,
-                                 subsample = params$subsample,
-                                 colsample_bytree = params$colsample_bytree,
-                                 lambda = params$lambda,
-                                 alpha = params$alpha), 
-                   data = xgb_train,
-                   nrounds = params$nrounds,
-                   booster = "gbtree",
-                   objective = "reg:linear",
-                   eval_metric = "rmse")
-  
-  return(mod)
-  
-}
-
-# Predict function for fitted XGBoost model
-predict_xgb <- function(mod, newdata, ...) {
-  
-  # Convert to specific DMatrix and predict
-  xgb_test <- xgb.DMatrix(data = as.matrix(newdata), label = newdata$y)
-  predict(mod, xgb_test)
-  
-}
 
 # Separate Train/Test partition from rsample object
 get_train_test <- function(obj, index) {
@@ -81,10 +46,10 @@ Xy_decompose <- function(x) {
   
 }
 
-# Runs Cross-Validation in correct form:
+# Runs Cross-Validation in version 1 (fixed fold assignment):
 # - 1) Loop over folds
 # - 2) Loop over params in each fold
-cv_1 <- function(df, params) {
+cv_1 <- function(df, funs, params) {
   
   # Create result container and folds object
   container <- list()
@@ -102,8 +67,8 @@ cv_1 <- function(df, params) {
     for (j in seq(nrow(params))) {
       
       # Fit model on training, predict on holdout and calculate error
-      mod <- fit_xgb(df_fold$train, params[j, ])
-      p <- predict_xgb(mod, newdata = df_fold$test)
+      mod <- do.call(funs[[1]], list(df = df_fold$train, params = params[j, ]))
+      p <- do.call(funs[[2]], list(mod = mod, newdata = df_fold$test))
       cv_errors[j] <- rmse(df_fold$test$y, p)
       
     }
@@ -126,10 +91,10 @@ cv_1 <- function(df, params) {
   
 }
 
-# Runs Cross-Validation in wrong form:
+# Runs Cross-Validation in version 2 (varying fold assignment):
 # - 1) Loop over params
 # - 2) Loop over folds in each param
-cv_2 <- function(df, params) {
+cv_2 <- function(df, funs, params) {
   
   # Loop over parameters
   pb <- txtProgressBar(min = 0, max = 10, style = 3)
@@ -145,8 +110,8 @@ cv_2 <- function(df, params) {
       # Get the data, fit model in training, predict on holdout, and calculate
       # errors
       df_fold <- get_train_test(folds, index = j)
-      mod <- fit_xgb(df_fold$train, params[i, ])
-      p <- predict_xgb(mod, newdata = df_fold$test)
+      mod <- do.call(funs[[1]], list(df = df_fold$train, params = params[i, ]))
+      p <- do.call(funs[[2]], list(mod = mod, newdata = df_fold$test))
       cv_errors[j] <- rmse(df_fold$test$y, p)
       
     }
@@ -163,7 +128,7 @@ cv_2 <- function(df, params) {
 }
 
 # Function for running one entire experiment with n samples
-run_experiment <- function(n, params) {
+run_experiment <- function(n, funs, params) {
   
   # Simulate data
   my_sim <- Xy(n = n, 
@@ -190,21 +155,21 @@ run_experiment <- function(n, params) {
   # Parameter id
   params$id <- 1:nrow(params)
   
-  # Run 'correct' cv
-  print("Start running correct cv")
-  cv_1_res <- cv_1(df_train, params)
+  # Run cv version 1
+  print("Start running cv version 1")
+  cv_1_res <- cv_1(df_train, funs, params)
   
-  # Run 'incorrect' cv
-  print("Start running incorrect cv")
-  cv_2_res <- cv_2(df_train, params)
+  # Run cv version 2
+  print("Start running cv version 2")
+  cv_2_res <- cv_2(df_train, funs, params)
   
   # Apply models on holdout
   print("Fit models on holdout")
   test_errors <- params %>% 
-    transpose() %>% 
-    map(~ fit_xgb(df = df_train, params = .x)) %>% 
-    map(~ predict_xgb(mod = .x, newdata = df_test)) %>% 
-    map(~ rmse(act = df_test$y, pred = .x)) %>% 
+    purrr::transpose() %>% 
+    purrr::map(function(params) do.call(funs[[1]], list(df = df_train, params = params))) %>% 
+    purrr::map(function(mod) do.call(funs[[2]], list(mod = mod, newdata = df_test))) %>% 
+    purrr::map(~ rmse(act = df_test$y, pred = .x)) %>% 
     unlist()
   
   # Calculate "true" error
