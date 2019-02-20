@@ -1,3 +1,5 @@
+source("code.R")
+
 set.seed(1000)
 
 # Parameters
