@@ -5,6 +5,7 @@ library(rsample)
 library(xgboost)
 library(purrr)
 library(furrr)
+library(ggplot2)
 
 # Function for fitting XGBoost model
 fit_xgb <- function(df, params, ...) {
@@ -55,6 +56,9 @@ get_train_test <- function(obj, index) {
 
 # Calculates RootMeanSquaredError
 rmse <- function(act, pred) sqrt(mean((act - pred)^2))
+
+# Calculate MeanAbsolutErrpr
+mae <- function(act, pred) mean(abs(act - pred))
 
 # Decompose Xy into target, signal and noise
 Xy_decompose <- function(x) {
