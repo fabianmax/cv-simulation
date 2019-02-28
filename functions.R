@@ -1,10 +1,4 @@
-library(Xy)
-library(dplyr)
-library(caret)
-library(rsample)
-library(purrr)
-library(furrr)
-library(ggplot2)
+source("libs.R")
 
 # Separate Train/Test partition from rsample object
 get_train_test <- function(obj, index) {
