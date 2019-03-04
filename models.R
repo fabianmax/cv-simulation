@@ -32,14 +32,16 @@ fit_xgb <- function(df, params, ...) {
     
     # Create train/valid split and convert to DMatrix format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
-    xgb_train <- xgb.DMatrix(data = as.matrix(df[in_train, ]), label = df$y[in_train])
-    xgb_valid <- xgb.DMatrix(data = as.matrix(df[-in_train, ]), label = df$y[-in_train])
+    target_idx <- which(colnames(df) == "y")
+    xgb_train <- xgb.DMatrix(data = as.matrix(df[in_train, -target_idx]), label = df$y[in_train])
+    xgb_valid <- xgb.DMatrix(data = as.matrix(df[in_train, -target_idx]), label = df$y[-in_train])
     watchlist <- list(validation = xgb_valid)
   
   } else {
     
     # Convert directly to DMatrix format
-    xgb_train <- xgb.DMatrix(data = as.matrix(df), label = df$y)
+    target_idx <- which(colnames(df) == "y")
+    xgb_train <- xgb.DMatrix(data = as.matrix(df[, -target_idx]), label = df$y)
     watchlist <- NULL
     
   }
@@ -75,3 +77,6 @@ predict_xgb <- function(mod, newdata, ...) {
   predict(mod, xgb_test)
   
 }
+
+
+

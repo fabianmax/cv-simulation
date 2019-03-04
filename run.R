@@ -18,7 +18,7 @@ params_xgb <- expand.grid(nrounds = c(250),
                           max_depth = c(3, 6, 9),
                           min_child_weight = 1,
                           subsample = c(0.7, 1),
-                          colsample_bytree = c(0.7),
+                          colsample_bytree = c(0.7, 1),
                           lambda = c(0, 1),
                           alpha = c(0, 1),
                           early_stopping_rounds = 3,
@@ -34,14 +34,14 @@ result_xgb <- runs %>%
   bind_rows()
 
 path_xgb <- paste0("results/", Sys.Date(), "_simulation_results_xgb.RData")
-save(result_xgb, file = path_xgb)
+save(result_xgb, params_xgb, file = path_xgb)
 
 
 # RandomForest ------------------------------------------------------------
 
 # Parameters
 params_rf <- expand.grid(trees = c(25, 50, 75, 100, 150, 200, 250),
-                         mtry = c(3, 4, 6, 10))
+                         mtry = c(3, 4, 5, 6, 8, 10))
 
 # Run
 result_rf <- runs %>% 
@@ -53,5 +53,5 @@ result_rf <- runs %>%
   bind_rows()
 
 path_rf <- paste0("results/", Sys.Date(), "_simulation_results_rf.RData")
-save(result_rf, file = path_rf)
+save(result_rf, params_rf, file = path_rf)
 

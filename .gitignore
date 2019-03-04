@@ -37,3 +37,6 @@ rsconnect/
 
 # .DS-Store file
 .DS_Store
+
+# Folders to ignore
+/results
