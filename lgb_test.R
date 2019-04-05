@@ -55,18 +55,6 @@ fit_lgb <- function(df, params, ...) {
 # LightGBM ----------------------------------------------------------------
 
 # Parameters
-params_lgb <- expand.grid(nrounds = c(250),
-                          eta = c(0.3),
-                          min_gain_to_split = c(0, 2),
-                          max_depth = 2^c(3, 6, 9), # simple rule of thumb for getting from max_depth to num_leaves
-                          min_child_weight = 1,
-                          subsample = c(0.7, 1),
-                          colsample_bytree = c(0.7),
-                          lambda_l1 = c(0, 1),
-                          lambda_l2 = c(0, 1),
-                          early_stopping_rounds = 3)
-
-
 params <- expand.grid(nrounds = c(100L),
                       eta = c(0.3),
                       min_gain_to_split = c(0),
@@ -76,11 +64,11 @@ params <- expand.grid(nrounds = c(100L),
                       colsample_bytree = c(0.7),
                       lambda_l1 = c(1L),
                       lambda_l2 = c(1L),
-                      early_stopping_rounds = 3L)
+                      early_stopping_rounds = 0)
 
 source("libs.R")
 
-# Simulate data
+# Simulate data (version 1 using Xy (André))
 my_sim <- Xy(n = 1000, 
              numvars = c(10, 10), 
              catvars = 0, 
@@ -94,12 +82,13 @@ my_sim <- Xy(n = 1000,
              intercept = FALSE, 
              stn = 4)
 
-# Extract data
 df_sim <- as.data.frame(my_sim$data)
 
-test <- fit_lgb(df_sim, params)
-
+# Simulate data (version 2 using caret)
 df_sim <- SLC14_1(1000)
+
+# Fit lgb
+test <- fit_lgb(df_sim, params)
 
 
 
