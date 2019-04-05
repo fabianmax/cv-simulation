@@ -67,16 +67,16 @@ params_lgb <- expand.grid(nrounds = c(250),
                           early_stopping_rounds = 3)
 
 
-params <- expand.grid(nrounds = c(250),
+params <- expand.grid(nrounds = c(100L),
                       eta = c(0.3),
                       min_gain_to_split = c(0),
                       max_depth = 2^c(3), # simple rule of thumb for getting from max_depth to num_leaves
-                      min_child_weight = 1,
-                      subsample = c(1),
+                      min_child_weight = 1L,
+                      subsample = c(1L),
                       colsample_bytree = c(0.7),
-                      lambda_l1 = c(1),
-                      lambda_l2 = c(1),
-                      early_stopping_rounds = 3)
+                      lambda_l1 = c(1L),
+                      lambda_l2 = c(1L),
+                      early_stopping_rounds = 3L)
 
 source("libs.R")
 
