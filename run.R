@@ -41,7 +41,7 @@ save(result_xgb, params_xgb, file = path_xgb)
 
 # Parameters
 params_rf <- expand.grid(trees = c(25, 50, 75, 100, 150, 200, 250),
-                         mtry = c(3, 4, 5, 6, 8, 10))
+                         mtry = c(2, 4, 6, 8, 10))
 
 # Run
 result_rf <- runs %>% 

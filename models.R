@@ -34,7 +34,7 @@ fit_xgb <- function(df, params, ...) {
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
     target_idx <- which(colnames(df) == "y")
     xgb_train <- xgb.DMatrix(data = as.matrix(df[in_train, -target_idx]), label = df$y[in_train])
-    xgb_valid <- xgb.DMatrix(data = as.matrix(df[in_train, -target_idx]), label = df$y[-in_train])
+    xgb_valid <- xgb.DMatrix(data = as.matrix(df[-in_train, -target_idx]), label = df$y[-in_train])
     watchlist <- list(validation = xgb_valid)
   
   } else {
