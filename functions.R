@@ -43,11 +43,11 @@ Xy_decompose <- function(x) {
 # Runs Cross-Validation in version 1 (fixed fold assignment):
 # - 1) Loop over folds
 # - 2) Loop over params in each fold
-cv_1 <- function(df, funs, params) {
+cv_1 <- function(df, funs, params, k = 10) {
   
   # Create result container and folds object
   container <- list()
-  folds <- rsample::vfold_cv(df, v = 10)
+  folds <- rsample::vfold_cv(df, v = k)
   
   # Loop over folds
   pb <- txtProgressBar(min = 0, max = nrow(folds), style = 3)
@@ -88,14 +88,14 @@ cv_1 <- function(df, funs, params) {
 # Runs Cross-Validation in version 2 (varying fold assignment):
 # - 1) Loop over params
 # - 2) Loop over folds in each param
-cv_2 <- function(df, funs, params) {
+cv_2 <- function(df, funs, params, k = 10) {
   
   # Loop over parameters
   pb <- txtProgressBar(min = 0, max = 10, style = 3)
   for (i in seq(nrow(params))) {
     
     # Create new fold-assignment for each parameterset 
-    folds <- rsample::vfold_cv(df, v = 10)
+    folds <- rsample::vfold_cv(df, v = k)
     cv_errors <- rep(NA, nrow(folds))
     
     # Loop over folds
@@ -122,7 +122,7 @@ cv_2 <- function(df, funs, params) {
 }
 
 # Function for running one entire experiment with n samples
-run_experiment <- function(n, funs, params) {
+run_experiment <- function(n, funs, params, folds) {
   
   # Simulate data
   my_sim <- Xy(n = n, 
@@ -151,11 +151,11 @@ run_experiment <- function(n, funs, params) {
   
   # Run cv version 1
   print("Start running cv version 1")
-  cv_1_res <- cv_1(df_train, funs, params)
+  cv_1_res <- cv_1(df_train, funs, params, k = folds)
   
   # Run cv version 2
   print("Start running cv version 2")
-  cv_2_res <- cv_2(df_train, funs, params)
+  cv_2_res <- cv_2(df_train, funs, params, k = folds)
   
   # Apply models on holdout
   print("Fit models on holdout")
@@ -178,6 +178,7 @@ run_experiment <- function(n, funs, params) {
   
   # Output
   out <- tibble(n = n,
+                folds = folds,
                 cv_1_error = cv_1_res$cv_error,
                 cv_2_error = cv_2_res$cv_error,
                 test_errors = test_errors,

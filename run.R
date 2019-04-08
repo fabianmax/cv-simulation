@@ -29,7 +29,7 @@ result_xgb <- runs %>%
   runif(min = n_min, max = n_max) %>% 
   round() %>% 
   as.list() %>% 
-  map(~ run_experiment(n = .x, list(fit_xgb, predict_xgb), params_xgb)) %>% 
+  map(~ run_experiment(n = .x, list(fit_xgb, predict_xgb), params_xgb, folds = 10)) %>% 
   map2(.x = ., .y = seq(length(.)), ~mutate(.x, id = .y)) %>% 
   bind_rows()
 
@@ -48,7 +48,7 @@ result_rf <- runs %>%
   runif(min = n_min, max = n_max) %>% 
   round() %>% 
   as.list() %>% 
-  map(~ run_experiment(n = .x, list(fit_rf, predict_rf), params_rf)) %>% 
+  map(~ run_experiment(n = .x, list(fit_rf, predict_rf), params_rf, folds = 10)) %>% 
   map2(.x = ., .y = seq(length(.)), ~mutate(.x, id = .y)) %>% 
   bind_rows()
 
