@@ -8,6 +8,7 @@ set.seed(1000)
 runs <- 10
 n_min <- 1000
 n_max <- 10000
+folds <- 10
 
 # XGBoost -----------------------------------------------------------------
 
@@ -22,19 +23,45 @@ params_xgb <- expand.grid(nrounds = c(250),
                           lambda = c(0, 1),
                           alpha = c(0, 1),
                           early_stopping_rounds = 3,
-                          nthread = 6)
+                          nthread = 4)
 
 # Run
 result_xgb <- runs %>% 
   runif(min = n_min, max = n_max) %>% 
   round() %>% 
   as.list() %>% 
-  map(~ run_experiment(n = .x, list(fit_xgb, predict_xgb), params_xgb, folds = 10)) %>% 
+  map(~ run_experiment(n = .x, list(fit_xgb, predict_xgb), params_xgb, folds = folds)) %>% 
   map2(.x = ., .y = seq(length(.)), ~mutate(.x, id = .y)) %>% 
   bind_rows()
 
 path_xgb <- paste0("results/", Sys.Date(), "_simulation_results_xgb.RData")
 save(result_xgb, params_xgb, file = path_xgb)
+
+
+
+# CatBoost ----------------------------------------------------------------
+
+# Parameters
+params_cat <- expand.grid(nrounds = c(100, 250),
+                          eta = 0.03,
+                          lambda_l2 = c(0, 1),
+                          max_depth = c(3, 6, 9),
+                          min_data_in_leaf = 1,
+                          colsample_bytree = c(0.7, 1),
+                          od_pval = c(0, 10^-1, 10^-2, 10^-3),
+                          nthread = 4)
+
+# Run
+result_cat <- runs %>% 
+  runif(min = n_min, max = n_max) %>% 
+  round() %>% 
+  as.list() %>% 
+  map(~ run_experiment(n = .x, list(fit_cat, predict_cat), params_cat, folds = folds)) %>% 
+  map2(.x = ., .y = seq(length(.)), ~mutate(.x, id = .y)) %>% 
+  bind_rows()
+
+path_cat <- paste0("results/", Sys.Date(), "_simulation_results_cat.RData")
+save(result_cat, params_cat, file = path_cat)
 
 
 # RandomForest ------------------------------------------------------------
@@ -48,7 +75,7 @@ result_rf <- runs %>%
   runif(min = n_min, max = n_max) %>% 
   round() %>% 
   as.list() %>% 
-  map(~ run_experiment(n = .x, list(fit_rf, predict_rf), params_rf, folds = 10)) %>% 
+  map(~ run_experiment(n = .x, list(fit_rf, predict_rf), params_rf, folds = folds)) %>% 
   map2(.x = ., .y = seq(length(.)), ~mutate(.x, id = .y)) %>% 
   bind_rows()
 
