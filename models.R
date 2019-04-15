@@ -81,7 +81,7 @@ predict_xgb <- function(mod, newdata, ...) {
   }
   
   # Convert to specific DMatrix and predict
-  test_dmatrix <- xgb.DMatrix(data = as.matrix(newdata), label = newdata$y)
+  test_dmatrix <- xgb.DMatrix(data = as.matrix(newdata))
   predict(mod, test_dmatrix)
   
 }
