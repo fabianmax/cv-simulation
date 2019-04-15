@@ -74,6 +74,12 @@ fit_xgb <- function(df, params, ...) {
 # Predict function for fitted XGBoost model
 predict_xgb <- function(mod, newdata, ...) {
   
+  # Remove target name from newdata, if present
+  # (current version of xgboost throws an error if names are not identical)
+  if ("y" %in% colnames(newdata)) {
+    newdata$y <- NULL
+  }
+  
   # Convert to specific DMatrix and predict
   test_dmatrix <- xgb.DMatrix(data = as.matrix(newdata), label = newdata$y)
   predict(mod, test_dmatrix)
@@ -132,6 +138,12 @@ fit_cat <- function(df, params, ...) {
 
 # Predict function for fitted CatBoost model
 predict_cat <- function(mod, newdata, ...) {
+  
+  # Remove target name from newdata, if present
+  # (similar to xgboost)
+  if ("y" %in% colnames(newdata)) {
+    newdata$y <- NULL
+  }
   
   # Convert to specific catboost.Pool and predict
   test_pool <- catboost.load_pool(data = as.matrix(newdata))

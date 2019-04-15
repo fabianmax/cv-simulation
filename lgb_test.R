@@ -2,12 +2,14 @@
 
 fit_lgb <- function(df, params, ...) {
   
+  # Which columns is the target
+  target_idx <- which(colnames(df) == "y")
+  
   # Check if early stopping should be applied
   if (!is.null(params$early_stopping_rounds)) {
     
     # Create train/valid split and convert to DMatrix format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
-    target_idx <- which(colnames(df) == "y")
     lgb_train <- lgb.Dataset(data = as.matrix(df[in_train, -target_idx]), label = df$y[in_train])
     lgb_valid <- lgb.Dataset(data = as.matrix(df[-in_train, -target_idx]), label = df$y[-in_train])
     watchlist <- list(eval = lgb_valid)
@@ -15,7 +17,7 @@ fit_lgb <- function(df, params, ...) {
   } else {
     
     # Convert directly to DMatrix format
-    lgb_train <- lgb.Dataset(data = as.matrix(df), label = df$y)
+    lgb_train <- lgb.Dataset(data = as.matrix(df[, -target_idx]), label = df$y)
     lgb_valid <- list()
     watchlist <- list()
     
@@ -38,17 +40,6 @@ fit_lgb <- function(df, params, ...) {
                    obj = "regression",
                    eval = "mean_squared_error")
   
-  # mod <- lgb.train(data = lgb_train,
-  #                  obj = "regression")
-  # 
-  # lightgbm(data = lgb.Dataset(data = as.matrix(df[in_train, -21])),
-  #          label = df$y[in_train],
-  #          num_leaves = 4,
-  #          learning_rate = 1,
-  #          nrounds = 2,
-  #          objective = "regression")
-  
-  
 }
 
 
@@ -59,13 +50,15 @@ params <- expand.grid(nrounds = c(100L),
                       eta = c(0.3),
                       min_gain_to_split = c(0),
                       max_depth = 2^c(3), # simple rule of thumb for getting from max_depth to num_leaves
+                      num_leaves = c(5L), # Change Jan 
                       min_child_weight = 1L,
                       subsample = c(1L),
                       colsample_bytree = c(0.7),
                       lambda_l1 = c(1L),
                       lambda_l2 = c(1L),
-                      early_stopping_rounds = 0)
-
+                      early_stopping_rounds = 0,
+                      nthread = 4) # Change Jan 
+ 
 source("libs.R")
 
 # Simulate data (version 1 using Xy (André))
@@ -90,5 +83,19 @@ df_sim <- SLC14_1(1000)
 # Fit lgb
 test <- fit_lgb(df_sim, params)
 
+
+df_testing <- lgb.Dataset(data = as.matrix(df_sim[, -21]), label = df_sim$y)
+lgb.Dataset.construct(df_testing)
+lightgbm(data = df_testing)
+
+lightgbm(data = as.matrix(df_sim[, -21]), label = df_sim$y)
+
+
+
+library(lightgbm)
+data(agaricus.train, package = "lightgbm")
+train <- agaricus.train
+dtrain <- lgb.Dataset(train$data, label = train$label)
+lgb.Dataset.construct(dtrain)
 
 
