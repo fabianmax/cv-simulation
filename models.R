@@ -8,7 +8,9 @@ fit_rf <- function(df, params, ...) {
   # Run training via formula interface
   mod <- ranger(y ~ ., 
                 data = df, 
-                num.trees = params$trees)
+                num.trees = params$trees,
+                mtry = params$mtry,
+                num.threads = params$nthreads)
   
   return(mod)
   

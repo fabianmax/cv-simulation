@@ -9,6 +9,7 @@ runs <- 10
 n_min <- 1000
 n_max <- 10000
 folds <- 10
+cpus <- 4
 
 # XGBoost -----------------------------------------------------------------
 
@@ -23,7 +24,7 @@ params_xgb <- expand.grid(nrounds = c(250),
                           lambda = c(0, 1),
                           alpha = c(0, 1),
                           early_stopping_rounds = 3,
-                          nthread = 4)
+                          nthread = cpus)
 
 # Run
 result_xgb <- runs %>% 
@@ -49,7 +50,7 @@ params_cat <- expand.grid(nrounds = c(100, 250),
                           min_data_in_leaf = 1,
                           colsample_bytree = c(0.7, 1),
                           od_pval = c(0, 10^-1, 10^-2, 10^-3),
-                          nthread = 4)
+                          nthread = cpus)
 
 # Run
 result_cat <- runs %>% 
@@ -68,7 +69,8 @@ save(result_cat, params_cat, file = path_cat)
 
 # Parameters
 params_rf <- expand.grid(trees = c(25, 50, 75, 100, 150, 200, 250),
-                         mtry = c(2, 4, 6, 8, 10))
+                         mtry = c(2, 4, 6, 8, 10),
+                         nthread = cpus)
 
 # Run
 result_rf <- runs %>% 
