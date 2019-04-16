@@ -170,10 +170,10 @@ run_experiment <- function(n, funs, params, folds) {
   print("Calculate true error")
   my_sim_decomposed <- Xy_decompose(my_sim)
   
-  true_error_train = rmse(my_sim_decomposed$target[in_train], 
-                          my_sim_decomposed$signal[in_train])
+  true_error_train <- rmse(my_sim_decomposed$target[in_train], 
+                           my_sim_decomposed$signal[in_train])
   
-  true_error_test = rmse(my_sim_decomposed$target[-in_train], 
+  true_error_test <- rmse(my_sim_decomposed$target[-in_train], 
                           my_sim_decomposed$signal[-in_train])
   
   # Output
