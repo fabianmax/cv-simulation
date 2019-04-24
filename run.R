@@ -77,6 +77,7 @@ params_lgb <- expand.grid(num_iterations = c(100, 250),
                           feature_fraction = 1,
                           lambda_l1 = 0,
                           lambda_l2 = c(0, 1),
+                          early_stopping_rounds = 3,
                           num_threads = cpus)
 
 # Run

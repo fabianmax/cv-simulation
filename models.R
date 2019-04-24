@@ -165,7 +165,7 @@ fit_lgb <- function(df, params, ...) {
   target_idx <- which(colnames(df) == "y")
   
   # Check if early stopping should be applied
-  if (!is.null(params$early_stopping_rounds) & params$early_stopping_round > 0) {
+  if (!is.null(params$early_stopping_rounds) & params$early_stopping_rounds > 0) {
     
     # Create train/valid split and convert to DMatrix format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
