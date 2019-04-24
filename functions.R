@@ -28,6 +28,24 @@ row_to_list <- function(row) {
   return(a_list)
 }
 
+# Prepare params for model call
+prepare_params <- function(params) {
+  
+  if (class(params) %in% c("data.frame", "list")) {
+    if ("id" %in% names(params)) {
+      params$id <- NULL
+    }
+    if (class(params) == "data.frame") {
+      params <- row_to_list(params)
+    }
+  } else {
+    stop("params should be list or data.frame")
+  }
+  
+  return(params)
+  
+}
+
 # Decompose Xy into target, signal and noise
 Xy_decompose <- function(x) {
   
