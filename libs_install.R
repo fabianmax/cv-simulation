@@ -8,7 +8,10 @@ install.packages(c("dplyr",
                    "ranger",
                    "xgboost",
                    "viridis",
-                   "devtools"))
+                   "devtools",
+                   "testthat",
+                   "roxygen2",
+                   "data.table"))
 
 # Install from github
 devtools::install_github("andrebleier/Xy")
