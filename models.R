@@ -33,7 +33,7 @@ fit_xgb <- function(df, params, ...) {
   target_idx <- which(colnames(df) == "y")
   
   # Check if early stopping should be applied
-  if (!is.null(params$early_stopping_rounds)) {
+  if (!is.null(params$early_stopping_rounds) && params$early_stopping_rounds > 0) {
     
     # Create train/valid split and convert to DMatrix format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
@@ -98,7 +98,7 @@ fit_cat <- function(df, params, ...) {
   target_idx <- which(colnames(df) == "y")
   
   # Check if early stopping should be applied
-  if (params$od_pval > 0) {
+  if (!is.null(params$od_pval) && params$od_pval > 0) {
     
     # Create train/valid split and convert to catboost.Pool format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
@@ -165,7 +165,7 @@ fit_lgb <- function(df, params, ...) {
   target_idx <- which(colnames(df) == "y")
   
   # Check if early stopping should be applied
-  if (!is.null(params$early_stopping_rounds) & params$early_stopping_rounds > 0) {
+  if (!is.null(params$early_stopping_rounds) && params$early_stopping_rounds > 0) {
     
     # Create train/valid split and convert to DMatrix format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
@@ -182,8 +182,13 @@ fit_lgb <- function(df, params, ...) {
     
   }
   
+  # Convert params
+  params <- params %>% 
+    dplyr::select(-id) %>% 
+    row_to_list(params)
+  
   # Run training
-  mod <- lgb.train(params = row_to_list(params),
+  mod <- lgb.train(params = params,
                    data = lgb_train,
                    valids = watchlist,
                    verbose = 0,
