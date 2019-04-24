@@ -165,7 +165,7 @@ fit_lgb <- function(df, params, ...) {
   target_idx <- which(colnames(df) == "y")
   
   # Check if early stopping should be applied
-  if (!is.null(params$early_stopping_rounds)) {
+  if (!is.null(params$early_stopping_rounds) & params$early_stopping_round > 0) {
     
     # Create train/valid split and convert to DMatrix format
     in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
@@ -183,19 +183,10 @@ fit_lgb <- function(df, params, ...) {
   }
   
   # Run training
-  mod <- lgb.train(params = list(eta = params$eta,
-                                 min_gain_to_split = params$min_gain_to_split,
-                                 num_leaves = params$num_leaves,
-                                 min_child_weight = params$min_child_weight,
-                                 subsample = params$subsample,
-                                 colsample_bytree = params$colsample_bytree,
-                                 lambda_l1 = params$lambda_l1,
-                                 lambda_l2 = params$lambda_l2,
-                                 nthread = params$nthread),
+  mod <- lgb.train(params = row_to_list(params),
                    data = lgb_train,
-                   nrounds = params$nrounds,
                    valids = watchlist,
-                   early_stopping_rounds = params$early_stopping_rounds,
+                   verbose = 0,
                    obj = "regression",
                    eval = "mean_squared_error")
   

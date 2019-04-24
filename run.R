@@ -65,6 +65,33 @@ path_cat <- paste0("results/", Sys.Date(), "_simulation_results_cat.RData")
 save(result_cat, params_cat, file = path_cat)
 
 
+# LightGBM ----------------------------------------------------------------
+
+# Parameters
+params_lgb <- expand.grid(num_iterations = c(100, 250),
+                          learning_rate = 0.1,
+                          num_leaves = 31,
+                          max_depth = c(3, 6, 9),
+                          min_data_in_leaf = 1,
+                          bagging_fraction = 1,
+                          feature_fraction = 1,
+                          lambda_l1 = 0,
+                          lambda_l2 = c(0, 1),
+                          num_threads = cpus)
+
+# Run
+result_lgb <- runs %>% 
+  runif(min = n_min, max = n_max) %>% 
+  round() %>% 
+  as.list() %>% 
+  map(~ run_experiment(n = .x, list(fit_lgb, predict_lgb), params_lgb, folds = folds)) %>% 
+  map2(.x = ., .y = seq(length(.)), ~mutate(.x, id = .y)) %>% 
+  bind_rows()
+
+path_lgb <- paste0("results/", Sys.Date(), "_simulation_results_lgb.RData")
+save(result_lgb, params_lgb, file = path_lgb)
+
+
 # RandomForest ------------------------------------------------------------
 
 # Parameters
