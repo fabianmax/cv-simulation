@@ -141,7 +141,6 @@ fit_cat <- function(df, params, ...) {
   
 }
 
-
 # Predict function for fitted CatBoost model
 predict_cat <- function(mod, newdata, ...) {
   
@@ -157,3 +156,62 @@ predict_cat <- function(mod, newdata, ...) {
   
 }
 
+
+# LightGBM ----------------------------------------------------------------
+
+fit_lgb <- function(df, params, ...) {
+  
+  # Which columns is the target
+  target_idx <- which(colnames(df) == "y")
+  
+  # Check if early stopping should be applied
+  if (!is.null(params$early_stopping_rounds)) {
+    
+    # Create train/valid split and convert to DMatrix format
+    in_train <- createDataPartition(y = df$y, p = 0.8, list = FALSE)
+    lgb_train <- lgb.Dataset(data = as.matrix(df[in_train, -target_idx]), label = df$y[in_train])
+    lgb_valid <- lgb.Dataset(data = as.matrix(df[-in_train, -target_idx]), label = df$y[-in_train])
+    watchlist <- list(eval = lgb_valid)
+    
+  } else {
+    
+    # Convert directly to lgb format
+    lgb_train <- lgb.Dataset(data = as.matrix(df[, -target_idx]), label = df$y)
+    lgb_valid <- list()
+    watchlist <- list()
+    
+  }
+  
+  # Run training
+  mod <- lgb.train(params = list(eta = params$eta,
+                                 min_gain_to_split = params$min_gain_to_split,
+                                 num_leaves = params$num_leaves,
+                                 min_child_weight = params$min_child_weight,
+                                 subsample = params$subsample,
+                                 colsample_bytree = params$colsample_bytree,
+                                 lambda_l1 = params$lambda_l1,
+                                 lambda_l2 = params$lambda_l2,
+                                 nthread = params$nthread),
+                   data = lgb_train,
+                   nrounds = params$nrounds,
+                   valids = watchlist,
+                   early_stopping_rounds = params$early_stopping_rounds,
+                   obj = "regression",
+                   eval = "mean_squared_error")
+  
+}
+
+# Predict function for fitted LightGBM model
+predict_lgb <- function(mod, newdata, ...) {
+  
+  # Remove target name from newdata, if present
+  # (similar to xgboost)
+  if ("y" %in% colnames(newdata)) {
+    newdata$y <- NULL
+  }
+  
+  # Convert to specific lgb dataset and predict
+  test_lgb <- lgb.Dataset(data = as.matrix(newdata))
+  predict(mod, test_lgb)
+  
+}
