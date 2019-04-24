@@ -19,6 +19,15 @@ rmse <- function(act, pred) sqrt(mean((act - pred)^2))
 # Calculate MeanAbsolutErrpr
 mae <- function(act, pred) mean(abs(act - pred))
 
+# Convert data.frame row to named list
+row_to_list <- function(row) {
+  
+  a_list <- as.list(row)
+  attr(a_list, "out.attrs") <- NULL
+  
+  return(a_list)
+}
+
 # Decompose Xy into target, signal and noise
 Xy_decompose <- function(x) {
   
