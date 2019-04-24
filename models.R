@@ -189,7 +189,7 @@ fit_lgb <- function(df, params, ...) {
   mod <- lgb.train(params = params,
                    data = lgb_train,
                    valids = watchlist,
-                   verbose = 0,
+                   verbose = -1,
                    obj = "regression",
                    eval = "mean_squared_error")
   
