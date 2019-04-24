@@ -185,7 +185,7 @@ fit_lgb <- function(df, params, ...) {
   # Convert params
   params <- params %>% 
     dplyr::select(-id) %>% 
-    row_to_list(params)
+    row_to_list()
   
   # Run training
   mod <- lgb.train(params = params,
