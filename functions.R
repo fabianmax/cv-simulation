@@ -35,6 +35,9 @@ prepare_params <- function(params) {
     if ("id" %in% names(params)) {
       params$id <- NULL
     }
+    if ("cv_error" %in% names(params)) {
+      params$cv_error <- NULL
+    }
     if (class(params) == "data.frame") {
       params <- row_to_list(params)
     }
