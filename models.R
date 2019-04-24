@@ -202,7 +202,7 @@ predict_lgb <- function(mod, newdata, ...) {
   }
   
   # Convert to specific lgb dataset and predict
-  test_lgb <- lgb.Dataset(data = as.matrix(newdata))
+  test_lgb <- as.matrix(newdata)
   predict(mod, test_lgb)
   
 }
