@@ -44,13 +44,12 @@ save(result_xgb, params_xgb, file = path_xgb)
 
 # Parameters
 params_cat <- expand.grid(nrounds = c(100, 250),
-                          eta = 0.03,
-                          lambda_l2 = c(0, 1),
-                          max_depth = c(3, 6, 9),
+                          l2_leaf_reg = c(0, 1),
+                          depth = c(3, 6, 9),
                           min_data_in_leaf = 1,
-                          colsample_bytree = c(0.7, 1),
+                          rsm = c(0.7, 1),
                           od_pval = c(0, 10^-1, 10^-2, 10^-3),
-                          nthread = cpus)
+                          thread_count = cpus)
 
 # Run
 result_cat <- runs %>% 
